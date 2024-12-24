@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MyApp());
@@ -84,10 +86,59 @@ class SecondScreen extends StatefulWidget {
 }
 
 class _SecondScreenState extends State<SecondScreen> {
+    String weather_info = '';
+    String week_info = '';
+    double longitude = -94.04;
+    double latitude = 33.44;
+    String api_key = 'b5422874d4779ee24c0f0be04b165d73';
+    @override
+    void initState() {
+      super.initState();
+      _fetchCoordinates();
+    }
+    Future<void> _fetchCoordinates() async {
+        final response = await http.get(Uri.parse('http://api.openweathermap.org/geo/1.0/direct?q=${widget.city}&limit=1&appid=${api_key}'));
+        if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            setState(() {
+                longitude = data[0]["lon"];
+                latitude = data[0]['lat'];
+            });
+            _fetchWeather();
+        }
+        else {
+            setState(() {
+                weather_info = 'Не удалось найти город';
+            });
+        }
+    }
+
+    Future<void> _fetchWeather() async {
+      final response = await http.get(Uri.parse('https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&units=metric&exclude=minutely,hourly,alerts&appid=${api_key}'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response1.body);
+        setState(() {
+          weather_info = 'Температура: ${data['current.temp']}°C\n'
+                        'Ощущается как ${data['current.feels_like']}°C\n'
+                        'Атмосферное давление ${data['current.pressure']} гПа'
+                       'Влажность: ${data['current.humidity']}%\n'
+                       'Скорость ветра: ${data['current.wind_speed']*0.44704} м/с';
+          week_info = '';
+        });
+      } else {
+        setState(() {
+          print('Ошибка: ${response.statusCode} - ${response.reasonPhrase}');
+          weather_info = 'Не удалось получить данные о погоде';
+          week_info = 'Не удалось получить данные о погоде';
+        });
+      }
+    }
+
     void _navigateToThirdScreen(BuildContext context) {
         Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ThirdScreen(city: widget.city,)),
+        MaterialPageRoute(builder: (context) => ThirdScreen(city: widget.city, info: week_info)),
         );
     }
     @override
@@ -104,6 +155,8 @@ class _SecondScreenState extends State<SecondScreen> {
                     icon: Icon(Icons.arrow_forward),
                     label: Text(''),
                 ),
+                SizedBox(height: 20),
+                Text(weather_info)
             ],
         ),
       );
@@ -112,18 +165,20 @@ class _SecondScreenState extends State<SecondScreen> {
 
 class ThirdScreen extends StatefulWidget {
     final String city;
-    ThirdScreen({required this.city});
+    final String info;
+    ThirdScreen({required this.city, required this.info});
     @override
     State<ThirdScreen> createState() => _ThirdScreenState();
 }
 
 class _ThirdScreenState extends State<ThirdScreen> {
+ 
     @override
     Widget build(BuildContext context) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-            children: [Text('')],
+            children: [Text(widget.info)],
         )
       );
     }
