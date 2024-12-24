@@ -117,7 +117,7 @@ class _SecondScreenState extends State<SecondScreen> {
       final response = await http.get(Uri.parse('https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&units=metric&exclude=minutely,hourly,alerts&appid=${api_key}'));
 
       if (response.statusCode == 200) {
-        final data = json.decode(response1.body);
+        final data = json.decode(response.body);
         setState(() {
           weather_info = 'Температура: ${data['current.temp']}°C\n'
                         'Ощущается как ${data['current.feels_like']}°C\n'
