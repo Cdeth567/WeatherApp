@@ -114,16 +114,17 @@ class _SecondScreenState extends State<SecondScreen> {
     }
 
     Future<void> _fetchWeather() async {
-      final response = await http.get(Uri.parse('https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&units=metric&exclude=minutely,hourly,alerts&appid=${api_key}'));
+      final response = await http.get(Uri.parse('https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${api_key}'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          weather_info = 'Температура: ${data['current.temp']}°C\n'
-                        'Ощущается как ${data['current.feels_like']}°C\n'
-                        'Атмосферное давление ${data['current.pressure']} гПа'
-                       'Влажность: ${data['current.humidity']}%\n'
-                       'Скорость ветра: ${data['current.wind_speed']*0.44704} м/с';
+          print(data);
+          weather_info = 'Температура: ${(data['main']['temp']-273.15).round()}°C\n'
+                        'Ощущается как ${(data['main']['feels_like']-273.15).round()}°C\n'
+                        'Атмосферное давление ${data['main']['pressure']} гПа\n'
+                       'Влажность: ${data['main']['humidity']}%\n'
+                       'Скорость ветра: ${data['wind']['speed']} м/с';
           week_info = '';
         });
       } else {
@@ -147,16 +148,25 @@ class _SecondScreenState extends State<SecondScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
             children: [
-                Text(widget.city),
-                ElevatedButton.icon(
-                    onPressed: () {
-                      _navigateToThirdScreen(context);
-                    },
-                    icon: Icon(Icons.arrow_forward),
-                    label: Text(''),
+              Text(widget.city),
+              ElevatedButton.icon(
+                  onPressed: () {
+                    _navigateToThirdScreen(context);
+                  },
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text(''),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                weather_info,
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  height: 1.5,
                 ),
-                SizedBox(height: 20),
-                Text(weather_info)
+                textAlign: TextAlign.center,
+              )
             ],
         ),
       );
