@@ -86,6 +86,7 @@ class SecondScreen extends StatefulWidget {
 }
 
 class _SecondScreenState extends State<SecondScreen> {
+<<<<<<< HEAD
   String weather_info = '';
   List<String> week_info = [];
   double longitude = -94.04;
@@ -107,6 +108,63 @@ class _SecondScreenState extends State<SecondScreen> {
             latitude = data[0]['lat'];
         });
         _fetchWeather();
+=======
+    String weather_info = '';
+    String week_info = '';
+    double longitude = -94.04;
+    double latitude = 33.44;
+    String api_key = 'b5422874d4779ee24c0f0be04b165d73';
+    @override
+    void initState() {
+      super.initState();
+      _fetchCoordinates();
+    }
+    Future<void> _fetchCoordinates() async {
+        final response = await http.get(Uri.parse('http://api.openweathermap.org/geo/1.0/direct?q=${widget.city}&limit=1&appid=${api_key}'));
+        if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            setState(() {
+                longitude = data[0]["lon"];
+                latitude = data[0]['lat'];
+            });
+            _fetchWeather();
+        }
+        else {
+            setState(() {
+                weather_info = 'Не удалось найти город';
+            });
+        }
+    }
+
+    Future<void> _fetchWeather() async {
+      final response = await http.get(Uri.parse('https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${api_key}'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          print(data);
+          weather_info = 'Температура: ${(data['main']['temp']-273.15).round()}°C\n'
+                        'Ощущается как ${(data['main']['feels_like']-273.15).round()}°C\n'
+                        'Атмосферное давление ${data['main']['pressure']} гПа\n'
+                       'Влажность: ${data['main']['humidity']}%\n'
+                       'Скорость ветра: ${data['wind']['speed']} м/с';
+          week_info = '';
+        });
+      } else {
+        setState(() {
+          print('Ошибка: ${response.statusCode} - ${response.reasonPhrase}');
+          weather_info = 'Не удалось получить данные о погоде';
+          week_info = 'Не удалось получить данные о погоде';
+        });
+      }
+    }
+
+    void _navigateToThirdScreen(BuildContext context) {
+        Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ThirdScreen(city: widget.city, info: week_info)),
+        );
+>>>>>>> 8f3d0c94bc314607e267a54314fbc3802de4baa7
     }
     else {
         setState(() {
@@ -178,6 +236,7 @@ class _SecondScreenState extends State<SecondScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+<<<<<<< HEAD
           children: [
             Text(
               weather_info,
@@ -190,6 +249,29 @@ class _SecondScreenState extends State<SecondScreen> {
               textAlign: TextAlign.left,
             ),
           ],
+=======
+            children: [
+              Text(widget.city),
+              ElevatedButton.icon(
+                  onPressed: () {
+                    _navigateToThirdScreen(context);
+                  },
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text(''),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                weather_info,
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              )
+            ],
+>>>>>>> 8f3d0c94bc314607e267a54314fbc3802de4baa7
         ),
       )
     );
@@ -284,6 +366,7 @@ class WeatherCard extends StatelessWidget {
 
 
 class ThirdScreen extends StatefulWidget {
+<<<<<<< HEAD
   final String city;
   final List<String> info;
 
@@ -348,3 +431,24 @@ class _ThirdScreenState extends State<ThirdScreen> {
     );
   }
 }
+=======
+    final String city;
+    final String info;
+    ThirdScreen({required this.city, required this.info});
+    @override
+    State<ThirdScreen> createState() => _ThirdScreenState();
+}
+
+class _ThirdScreenState extends State<ThirdScreen> {
+ 
+    @override
+    Widget build(BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+            children: [Text(widget.info)],
+        )
+      );
+    }
+}
+>>>>>>> 8f3d0c94bc314607e267a54314fbc3802de4baa7
